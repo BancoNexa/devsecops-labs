@@ -1,0 +1,34 @@
+
+name: security-pipeline
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  code-scanning:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: javascript
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+
+  dependencies-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Node audit (Angular)
+        run: |
+          if [ -f "angular/package.json" ]; then
+            cd angular && npm install && npm audit --audit-level=high || true
+          else
+            echo "angular/package.json no encontrado (ejercicio didáctico)"
+          fi
